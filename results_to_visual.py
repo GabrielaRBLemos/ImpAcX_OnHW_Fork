@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from utils import config, folders_and_files
+from utils import options, folders_and_files
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -43,23 +43,23 @@ def results_to_fold_acc(results_file_name):
 
 
 def plot_all_results():
-    ml_results_file_name =  os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, config.ML_RESULTS_CSV)
+    ml_results_file_name =  os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, options.ML_RESULTS_CSV)
     df_ml_results_mean = results_to_mean_acc(ml_results_file_name)
     df_ml_results_fold = results_to_fold_acc(ml_results_file_name)
-    df_ml_results_mean.to_csv(os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, config.ML_RESULTS_MEAN_CSV), index=False)
-    df_ml_results_fold.to_csv(os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, config.ML_RESULTS_FOLD_CSV), index=False)
+    df_ml_results_mean.to_csv(os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, options.ML_RESULTS_MEAN_CSV), index=False)
+    df_ml_results_fold.to_csv(os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, options.ML_RESULTS_FOLD_CSV), index=False)
 
-    dl_results_file_name =  os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, config.DL_RESULTS_CSV)
+    dl_results_file_name =  os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, options.DL_RESULTS_CSV)
     df_dl_results_mean = results_to_mean_acc(dl_results_file_name)
     df_dl_results_fold = results_to_fold_acc(dl_results_file_name)
-    df_dl_results_mean.to_csv(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, config.DL_RESULTS_MEAN_CSV), index=False)
-    df_dl_results_fold.to_csv(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, config.DL_RESULTS_FOLD_CSV), index=False)
+    df_dl_results_mean.to_csv(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, options.DL_RESULTS_MEAN_CSV), index=False)
+    df_dl_results_fold.to_csv(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, options.DL_RESULTS_FOLD_CSV), index=False)
 
-    dl_results_opt_file_name =  os.path.join(config.BASE_OUTPUT, config.DL_RESULTS_OPT, config.DL_RESULTS_OPT_CSV)
+    dl_results_opt_file_name =  os.path.join(options.BASE_OUTPUT, options.DL_RESULTS_OPT, options.DL_RESULTS_OPT_CSV)
     df_dl_results_opt_mean = results_to_mean_acc(dl_results_opt_file_name)
     df_dl_results_opt_fold = results_to_fold_acc(dl_results_opt_file_name)
-    df_dl_results_opt_mean.to_csv(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS_OPT, config.DL_RESULTS_MEAN_OPT_CSV), index=False)
-    df_dl_results_opt_fold.to_csv(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS_OPT, config.DL_RESULTS_FOLD_OPT_CSV), index=False)
+    df_dl_results_opt_mean.to_csv(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS_OPT, options.DL_RESULTS_MEAN_OPT_CSV), index=False)
+    df_dl_results_opt_fold.to_csv(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS_OPT, options.DL_RESULTS_FOLD_OPT_CSV), index=False)
 
 
     df_dl = df_dl_results_mean.copy()
@@ -186,9 +186,9 @@ def plot_all_results():
     fig.update_traces(marker_size=15)
     # fig.show()
 
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.VISUALS)
-    fig.write_html(os.path.join(config.BASE_OUTPUT, config.VISUALS, 'ml_dl_all_results.html'))
-    # fig.write_image(os.path.join(config.BASE_OUTPUT, config.VISUALS, 'ml_dl_all_results.png'))
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.VISUALS)
+    fig.write_html(os.path.join(options.BASE_OUTPUT, options.VISUALS, 'ml_dl_all_results.html'))
+    # fig.write_image(os.path.join(options.BASE_OUTPUT, options.VISUALS, 'ml_dl_all_results.png'))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from pickle import TRUE
 from string import ascii_letters, ascii_lowercase, ascii_uppercase
-from utils import config
+from utils import options
 from utils import folders_and_files
 from platform import system
 
@@ -23,13 +23,13 @@ import sys
 import utils.helper_files as hf
 
 warnings.filterwarnings('ignore')
-ML_MODEL_AND_SCALER_DICT = {'SVM_rbf': [SVC(kernel='rbf', decision_function_shape='ovo', random_state=config.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'SVM_linear': [SVC(kernel='linear', decision_function_shape='ovo', random_state=config.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'RFC': [RandomForestClassifier(criterion='gini', n_estimators=100, random_state=config.RANDOM_STATE), None],
-                         'DT': [DecisionTreeClassifier(criterion='gini', random_state=config.RANDOM_STATE), None],
-                         'ET': [ExtraTreesClassifier(criterion='gini', n_estimators=100, random_state=config.RANDOM_STATE), None],
-                         'kNN': [KNeighborsClassifier(), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'LogReg': [LogisticRegression(random_state=config.RANDOM_STATE, max_iter=1000), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
+ML_MODEL_AND_SCALER_DICT = {'SVM_rbf': [SVC(kernel='rbf', decision_function_shape='ovo', random_state=options.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'SVM_linear': [SVC(kernel='linear', decision_function_shape='ovo', random_state=options.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'RFC': [RandomForestClassifier(criterion='gini', n_estimators=100, random_state=options.RANDOM_STATE), None],
+                         'DT': [DecisionTreeClassifier(criterion='gini', random_state=options.RANDOM_STATE), None],
+                         'ET': [ExtraTreesClassifier(criterion='gini', n_estimators=100, random_state=options.RANDOM_STATE), None],
+                         'kNN': [KNeighborsClassifier(), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'LogReg': [LogisticRegression(random_state=options.RANDOM_STATE, max_iter=1000), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
                          }
 
 # A list of DL baseline models
@@ -130,12 +130,12 @@ def OnHW_DL_get_prediction_space(case, dependency, k_fold_number, name):
 
 
 def OnHW_DL_analyze_failure_space_all():
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 name = f"failure_space"
                 print(f"[INFO] Evaluating: {case}_{dependency}_{k_fold_number}_{name}")
-                conf_mat_csv_file = hf.path_to_windows(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"prediction_rows{case}_{dependency}_{k_fold_number}.csv"))
+                conf_mat_csv_file = hf.path_to_windows(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"prediction_rows{case}_{dependency}_{k_fold_number}.csv"))
                 try:
                     prediction_rows = pd.read_csv(conf_mat_csv_file)
                 except:
@@ -195,7 +195,7 @@ def OnHW_DL_get_failure_space(prediction_rows,case,dependency,k_fold_number):
                 bar_labels.append(str(x))
                 x+=1
         
-        conf_mat_csv_file = hf.path_to_windows(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"{case}_{dependency}_{k_fold_number}_{name}.pdf"))
+        conf_mat_csv_file = hf.path_to_windows(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"{case}_{dependency}_{k_fold_number}_{name}.pdf"))
 
         plt.bar(bar_labels, failure_tally_for_bar_right, color='tab:green')
         plt.bar(bar_labels, failure_tally_for_bar_wrong, bottom=failure_tally_for_bar_right, color='tab:red')
@@ -246,7 +246,7 @@ def OnHW_DL_get_failure_space_array(prediction_rows,case,dependency,k_fold_numbe
     letter_case = "0"
     if letter in ascii_lowercase:
         letter_case = "1"
-    conf_mat_csv_file = hf.path_to_windows(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"prediction_space_{case}_{dependency}_{k_fold_number}_{letter}_{letter_case}.pdf"))
+    conf_mat_csv_file = hf.path_to_windows(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"prediction_space_{case}_{dependency}_{k_fold_number}_{letter}_{letter_case}.pdf"))
 
     plt.suptitle(f'{letter} Prediction Space', fontsize=10)
     plt.ylabel('Model number')
@@ -255,18 +255,18 @@ def OnHW_DL_get_failure_space_array(prediction_rows,case,dependency,k_fold_numbe
     plt.clf() 
 
 def OnHW_DL_get_prediction_space_all():
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 name = f"failure_space"
                 print(f"[INFO] Evaluating: {case}_{dependency}_{k_fold_number}_{name}")
                 prediction_rows= OnHW_DL_get_prediction_space(case, dependency, k_fold_number, name)
                 df_results = pd.DataFrame(prediction_rows)
-                conf_mat_csv_file = hf.path_to_windows(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"prediction_rows{case}_{dependency}_{k_fold_number}.csv"))
+                conf_mat_csv_file = hf.path_to_windows(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"prediction_rows{case}_{dependency}_{k_fold_number}.csv"))
                 df_results.to_csv(conf_mat_csv_file, index=False)
 
 def OnHW_ML_read_filtered_data(case, dependency, k_fold_number):
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
     folder_name = f"{case}_{dependency}_{k_fold_number}"
 
     train_X_filtered = np.load(os.path.join(path_to_models_and_data, folder_name, "train_X_filtered.npy"), allow_pickle=True)
@@ -291,7 +291,7 @@ def tsai_ready_data(case, dependency, k_fold_number):
 
     return trainX, trainy, testX, testy
 
-def X_to_fixlength(X, maxlen=config.MAXLEN):
+def X_to_fixlength(X, maxlen=options.MAXLEN):
     return pad_sequences(X, maxlen=maxlen, truncating='post')
 @contextmanager
 def suppress_stdout():

@@ -1,5 +1,5 @@
 from unicodedata import bidirectional
-from utils import config
+from utils import options
 from utils import folders_and_files
 
 import os
@@ -12,11 +12,11 @@ from optuna.integration import FastAIPruningCallback
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
-def X_to_fixlength(X, maxlen=config.MAXLEN):
+def X_to_fixlength(X, maxlen=options.MAXLEN):
     return pad_sequences(X, maxlen=maxlen, truncating='post')
 
 def OnHW_ML_read_filtered_data(case, dependency, k_fold_number):
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
     folder_name = f"{case}_{dependency}_{k_fold_number}"
 
     train_X_filtered = np.load(os.path.join(path_to_models_and_data, folder_name, "train_X_filtered.npy"), allow_pickle=True)
@@ -45,7 +45,7 @@ def tsai_ready_data(case, dependency, k_fold_number):
 
 def objective(trial: optuna.Trial):
 
-    model_name, case, dependency, k_fold_number = config.TO_OPTIMIZE[0], config.TO_OPTIMIZE[1], config.TO_OPTIMIZE[2], config.TO_OPTIMIZE[3]
+    model_name, case, dependency, k_fold_number = options.TO_OPTIMIZE[0], options.TO_OPTIMIZE[1], options.TO_OPTIMIZE[2], options.TO_OPTIMIZE[3]
     trainX, trainy, testX, testy = tsai_ready_data(case, dependency, k_fold_number)
     X, y, splits = combine_split_data([trainX, testX], [trainy, testy])
     
@@ -65,7 +65,7 @@ def objective(trial: optuna.Trial):
         fc_dropout = trial.suggest_float("fc_dropout", 0.0, 0.9,step=.1)
     
         arch = InceptionTimePlus
-        arch_config = {'nf': nf, 
+        arch_options = {'nf': nf, 
                     'fc_dropout': fc_dropout,
                     'depth': depth}
     
@@ -77,7 +77,7 @@ def objective(trial: optuna.Trial):
         bidirectional = trial.suggest_categorical('bidirectional', [True, False])        
 
         arch = LSTM
-        arch_config = {'n_layers': n_layers, 
+        arch_options = {'n_layers': n_layers, 
                         'fc_dropout': fc_dropout,  
                         'rnn_dropout': rnn_dropout,  
                         'bidirectional': bidirectional}
@@ -90,7 +90,7 @@ def objective(trial: optuna.Trial):
         bidirectional = trial.suggest_categorical('bidirectional', [True, False])        
 
         arch = LSTM_FCN
-        arch_config = {'rnn_layers': rnn_layers, 
+        arch_options = {'rnn_layers': rnn_layers, 
                         'fc_dropout': fc_dropout,  
                         'rnn_dropout': rnn_dropout,  
                         'bidirectional': bidirectional}
@@ -103,7 +103,7 @@ def objective(trial: optuna.Trial):
         bidirectional = trial.suggest_categorical('bidirectional', [True, False])        
 
         arch = MLSTM_FCN
-        arch_config = {'rnn_layers': rnn_layers, 
+        arch_options = {'rnn_layers': rnn_layers, 
                         'fc_dropout': fc_dropout,  
                         'rnn_dropout': rnn_dropout,  
                         'bidirectional': bidirectional}
@@ -112,7 +112,7 @@ def objective(trial: optuna.Trial):
     batch_tfms = TSStandardize(by_sample=True)
     learn = TSClassifier(
         X, y, splits=splits, bs=[64, 128], batch_tfms=batch_tfms,
-        arch=arch, arch_config=arch_config,
+        arch=arch, arch_options=arch_options,
         metrics=accuracy, cbs=FastAIPruningCallback(trial))
 
 
@@ -125,15 +125,15 @@ def objective(trial: optuna.Trial):
     return learn.recorder.values[-1][1]  # return the validation loss value of the last epoch
 
 
-'''Currently, the parameter "TO_OPTIMIZE" in the configuration file (config.py) is set to
+'''Currently, the parameter "TO_OPTIMIZE" in the optionsuration file (options.py) is set to
 TO_OPTIMIZE = ['InceptionTimePlus', 'lower', 'indep', 0]
-Change "TO_OPTIMIZE" in the configuration file to optimize other models over other datasets
+Change "TO_OPTIMIZE" in the optionsuration file to optimize other models over other datasets
 The model and optimal parameters info can be copied to 
 "DL_OPT_MODEL_LIST" in "OnHW_ML_DL_baseline_and_optimized_train_and_eval.py" for training and evaluation'''
 if __name__ == "__main__":
 
-    model_name, case, dependency, k_fold_number = config.TO_OPTIMIZE[0], config.TO_OPTIMIZE[1], config.TO_OPTIMIZE[2], config.TO_OPTIMIZE[3]
-    path_to_results = os.path.join(config.BASE_OUTPUT, config.OPTUNA, f'opt_{model_name}_{case}_{dependency}_{k_fold_number}.txt')
+    model_name, case, dependency, k_fold_number = options.TO_OPTIMIZE[0], options.TO_OPTIMIZE[1], options.TO_OPTIMIZE[2], options.TO_OPTIMIZE[3]
+    path_to_results = os.path.join(options.BASE_OUTPUT, options.OPTUNA, f'opt_{model_name}_{case}_{dependency}_{k_fold_number}.txt')
     with open(path_to_results, 'w') as f:
         
         sys.stdout = f

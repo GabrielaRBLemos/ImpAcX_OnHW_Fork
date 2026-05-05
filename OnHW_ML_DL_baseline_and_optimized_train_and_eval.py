@@ -1,4 +1,5 @@
-from utils import config
+# ==== Mudei options para options====
+from utils import options
 from utils import folders_and_files
 
 import os
@@ -23,24 +24,24 @@ from tsai.all import *
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # A list of ML baseline models
-ML_MODEL_AND_SCALER_DICT = {'SVM_rbf': [SVC(kernel='rbf', decision_function_shape='ovo', random_state=config.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'SVM_linear': [SVC(kernel='linear', decision_function_shape='ovo', random_state=config.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'RFC': [RandomForestClassifier(criterion='gini', n_estimators=100, random_state=config.RANDOM_STATE), None],
-                         'DT': [DecisionTreeClassifier(criterion='gini', random_state=config.RANDOM_STATE), None],
-                         'ET': [ExtraTreesClassifier(criterion='gini', n_estimators=100, random_state=config.RANDOM_STATE), None],
-                         'kNN': [KNeighborsClassifier(), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'LogReg': [LogisticRegression(random_state=config.RANDOM_STATE, max_iter=1000), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
+ML_MODEL_AND_SCALER_DICT = {'SVM_rbf': [SVC(kernel='rbf', decision_function_shape='ovo', random_state=options.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'SVM_linear': [SVC(kernel='linear', decision_function_shape='ovo', random_state=options.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'RFC': [RandomForestClassifier(criterion='gini', n_estimators=100, random_state=options.RANDOM_STATE), None],
+                         'DT': [DecisionTreeClassifier(criterion='gini', random_state=options.RANDOM_STATE), None],
+                         'ET': [ExtraTreesClassifier(criterion='gini', n_estimators=100, random_state=options.RANDOM_STATE), None],
+                         'kNN': [KNeighborsClassifier(), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'LogReg': [LogisticRegression(random_state=options.RANDOM_STATE, max_iter=1000), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
                          }
 
 # A list of ML models for metric learning
 METRICLEARNING_MODEL_AND_SCALER_DICT = {
-                         'metriclearn_SVM_rbf': [SVC(kernel='rbf', decision_function_shape='ovo', random_state=config.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'metriclearn_SVM_linear': [SVC(kernel='linear', decision_function_shape='ovo', random_state=config.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'metriclearn_RFC': [RandomForestClassifier(criterion='gini', n_estimators=100, random_state=config.RANDOM_STATE), None],
-                         'metriclearn_DT': [DecisionTreeClassifier(criterion='gini', random_state=config.RANDOM_STATE), None],
-                         'metriclearn_ET': [ExtraTreesClassifier(criterion='gini', n_estimators=100, random_state=config.RANDOM_STATE), None],
-                         'metriclearn_kNN': [KNeighborsClassifier(), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'metriclearn_LogReg': [LogisticRegression(random_state=config.RANDOM_STATE, max_iter=1000), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
+                         'metriclearn_SVM_rbf': [SVC(kernel='rbf', decision_function_shape='ovo', random_state=options.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'metriclearn_SVM_linear': [SVC(kernel='linear', decision_function_shape='ovo', random_state=options.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'metriclearn_RFC': [RandomForestClassifier(criterion='gini', n_estimators=100, random_state=options.RANDOM_STATE), None],
+                         'metriclearn_DT': [DecisionTreeClassifier(criterion='gini', random_state=options.RANDOM_STATE), None],
+                         'metriclearn_ET': [ExtraTreesClassifier(criterion='gini', n_estimators=100, random_state=options.RANDOM_STATE), None],
+                         'metriclearn_kNN': [KNeighborsClassifier(), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'metriclearn_LogReg': [LogisticRegression(random_state=options.RANDOM_STATE, max_iter=1000), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
                          }
 
 # A list of DL baseline models
@@ -89,14 +90,14 @@ DL_OPT_MODEL_LIST = [(InceptionTimePlus, {'lower': {'arch_params': {'nf': 64, 'f
 # {'case': [lower, upper, both], 'dependency': [dep, indep], 'k_fold_number': [0,1,2,3,4]}
 def load_OnHW_data(case, dependency, k_fold_number):
     path_to_folder = f"onhw2_{case}_{dependency}_{k_fold_number}"
-    train_X = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "X_train.npy"), allow_pickle=True)
-    test_X = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "X_test.npy"), allow_pickle=True)
-    train_y = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "y_train.npy"), allow_pickle=True)
-    test_y = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "y_test.npy"), allow_pickle=True)
+    train_X = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "X_train.npy"), allow_pickle=True)
+    test_X = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "X_test.npy"), allow_pickle=True)
+    train_y = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "y_train.npy"), allow_pickle=True)
+    test_y = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "y_test.npy"), allow_pickle=True)
     return train_X, train_y, test_X, test_y
 
 def filter_train_test(X, y, case):
-    lower_bound, upper_bound = max(config.HARD_LOWER_BOUND, config.MEAN[case] - config.CUT_OFF_COEFF*config.STD[case]), min(config.HARD_UPPER_BOUND, config.MEAN[case] + config.CUT_OFF_COEFF*config.STD[case])
+    lower_bound, upper_bound = max(options.HARD_LOWER_BOUND, options.MEAN[case] - options.CUT_OFF_COEFF*options.STD[case]), min(options.HARD_UPPER_BOUND, options.MEAN[case] + options.CUT_OFF_COEFF*options.STD[case])
     mask = [(len(data) >= lower_bound) & (len(data) <= upper_bound) for data in X]
     return X[mask], y[mask]
 
@@ -121,11 +122,23 @@ def X_npy_to_df(X):
 def ts_extract_feautures(train_X, train_y, test_X):
     df_train_X = X_npy_to_df(train_X)
     df_test_X = X_npy_to_df(test_X)
+    
+    # ==== Forcing into numeric
+    df_train_X = df_train_X.astype({'id': 'int64', 'time': 'int64', **{col: 'float64' for col in df_train_X.columns if col.startswith('f_')}})# ==== Forcing into numeric
+    df_test_X = df_test_X.astype({'id': 'int64', 'time': 'int64', **{col: 'float64' for col in df_train_X.columns if col.startswith('f_')}})
+    
+    #==== Teste
+    print(df_train_X.dtypes)
+    #print(df_train_X.head())
+    #print("non-numeric:")
+    print(df_train_X.select_dtypes(exclude=['number']).columns.tolist())
+    #==== Teste FIM
 
     extracted_features = extract_features(df_train_X, column_id='id', column_sort="time")
+    
     # remove all NaN values
     impute(extracted_features)
-    features_filtered_train = select_features(extracted_features, train_y, multiclass=True, n_significant=config.NUM_SIG)
+    features_filtered_train = select_features(extracted_features, train_y, multiclass=True, n_significant=options.NUM_SIG)
 
     features_filtered_test = extract_features(df_test_X, column_id='id', column_sort="time",
                                                kind_to_fc_parameters=settings.from_columns(features_filtered_train.columns))
@@ -159,11 +172,11 @@ dataset/
         └── readme.txt
 '''
 def OnHW_ML_filter_and_extract():
-    ## folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    ## folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 print(f"Processing dataset:{case}_{dependency}_{k_fold_number}")
                 folder_name = f"{case}_{dependency}_{k_fold_number}"
                 ## folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
@@ -175,7 +188,7 @@ def OnHW_ML_filter_and_extract():
                 extracted_features, features_filtered_train, features_filtered_test = ts_extract_feautures(
                     train_X_filtered, train_y_filtered, test_X_filtered)
 
-                path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+                path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
                 folder_name = f"{case}_{dependency}_{k_fold_number}"
                 ## folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
 
@@ -190,7 +203,7 @@ def OnHW_ML_filter_and_extract():
 
 
 def OnHW_ML_read_filtered_data_and_extracted_features(case, dependency, k_fold_number):
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
     folder_name = f"{case}_{dependency}_{k_fold_number}"
 
     train_X_filtered = np.load(os.path.join(path_to_models_and_data, folder_name, "train_X_filtered.npy"), allow_pickle=True)
@@ -209,7 +222,7 @@ def OnHW_ML_train_and_save(case, dependency, k_fold_number, model_and_scaler_dic
     for name, model_and_scaler in model_and_scaler_dict.items():
         print(f"[INFO] Training: {case}_{dependency}_{k_fold_number}_{name}")
         folder_name = f"{case}_{dependency}_{k_fold_number}"
-        path_to_model = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA, folder_name)
+        path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)
         model_name, scaler_name = f"model_{name}", f"scaler_{name}"
         model, scaler = model_and_scaler[0], model_and_scaler[1]
 
@@ -231,12 +244,12 @@ def OnHW_MetricLearn_train_and_save(case, dependency, k_fold_number, model_and_s
     for name, model_and_scaler in model_and_scaler_dict.items():
         print(f"[INFO] Training: {case}_{dependency}_{k_fold_number}_{name}")
         folder_name = f"{case}_{dependency}_{k_fold_number}"
-        path_to_model = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA, folder_name)
+        path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)
         model_name, scaler_name, nca_name = f"nca_model_{name}", f"nca_scaler_{name}", f"nca_{name}"
         model = model_and_scaler[0]
 
         scaler = StandardScaler() # NCA requires scaled data
-        nca = NeighborhoodComponentsAnalysis(n_components=21, random_state=config.RANDOM_STATE)
+        nca = NeighborhoodComponentsAnalysis(n_components=21, random_state=options.RANDOM_STATE)
 
         train_X_features_transformed = scaler.fit_transform(train_X_features)
         train_X_features_transformed = pd.DataFrame(train_X_features_transformed)
@@ -251,7 +264,7 @@ def OnHW_MetricLearn_train_and_save(case, dependency, k_fold_number, model_and_s
 
 def OnHW_ML_load_a_model_and_scaler_by_name(case, dependency, k_fold_number, name):
     folder_name = f"{case}_{dependency}_{k_fold_number}"
-    path_to_model = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA, folder_name)
+    path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)
     model_name, scaler_name = f"model_{name}", f"scaler_{name}"
     model = folders_and_files.load_model(path_to_model, model_name)
     scaler = folders_and_files.load_model(path_to_model, scaler_name)
@@ -260,7 +273,7 @@ def OnHW_ML_load_a_model_and_scaler_by_name(case, dependency, k_fold_number, nam
 
 def OnHW_MetricLearn_load_a_model_and_scaler_by_name(case, dependency, k_fold_number, name):
     folder_name = f"{case}_{dependency}_{k_fold_number}"
-    path_to_model = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA, folder_name)
+    path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)
     model_name, scaler_name, nca_name = f"nca_model_{name}", f"nca_scaler_{name}", f"nca_{name}"
     model = folders_and_files.load_model(path_to_model, model_name)
     scaler = folders_and_files.load_model(path_to_model, scaler_name)
@@ -306,22 +319,22 @@ def OnHW_MetricLearn_evaluate_model(case, dependency, k_fold_number, name):
     return accuracy, report, conf_mat
 
 def OnHW_ML_train_all():
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 OnHW_ML_train_and_save(case, dependency, k_fold_number, ML_MODEL_AND_SCALER_DICT)
 
 def OnHW_MetricLearn_train_all():
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 OnHW_MetricLearn_train_and_save(case, dependency, k_fold_number, METRICLEARNING_MODEL_AND_SCALER_DICT)
 
 def OnHW_ML_evaluate_all():
-    path_to_results = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, config.ML_RESULTS_CSV)
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    path_to_results = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, options.ML_RESULTS_CSV)
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 for name in ML_MODEL_AND_SCALER_DICT.keys():
                     print(f"[INFO] Evaluating: {case}_{dependency}_{k_fold_number}_{name}")
                     accuracy, report, conf_mat = OnHW_ML_evaluate_model(case, dependency, k_fold_number, name)
@@ -332,19 +345,19 @@ def OnHW_ML_evaluate_all():
                     else:
                         df_results.to_csv(path_to_results, index = False)
 
-                    classification_report_file = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_{name}.txt")
+                    classification_report_file = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_{name}.txt")
                     with open(classification_report_file, 'w') as f:
                         print(report, file=f)
 
-                    conf_mat_csv_file = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_{name}.csv")
+                    conf_mat_csv_file = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_{name}.csv")
                     df_conf_mat = pd.DataFrame(conf_mat)
                     df_conf_mat.to_csv(conf_mat_csv_file, index=False)
 
 def OnHW_MetricLearn_evaluate_all():
-    path_to_results = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, config.ML_RESULTS_CSV)
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    path_to_results = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, options.ML_RESULTS_CSV)
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 for name in METRICLEARNING_MODEL_AND_SCALER_DICT.keys():
                     print(f"[INFO] Evaluating: {case}_{dependency}_{k_fold_number}_{name}")
                     accuracy, report, conf_mat = OnHW_MetricLearn_evaluate_model(case, dependency, k_fold_number, name)
@@ -355,19 +368,19 @@ def OnHW_MetricLearn_evaluate_all():
                     else:
                         df_results.to_csv(path_to_results, index = False)
 
-                    classification_report_file = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_{name}.txt")
+                    classification_report_file = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_{name}.txt")
                     with open(classification_report_file, 'w') as f:
                         print(report, file=f)
 
-                    conf_mat_csv_file = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_{name}.csv")
+                    conf_mat_csv_file = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_{name}.csv")
                     df_conf_mat = pd.DataFrame(conf_mat)
                     df_conf_mat.to_csv(conf_mat_csv_file, index=False)
 
-def X_to_fixlength(X, maxlen=config.MAXLEN):
+def X_to_fixlength(X, maxlen=options.MAXLEN):
     return pad_sequences(X, maxlen=maxlen, truncating='post')
 
 def OnHW_ML_read_filtered_data(case, dependency, k_fold_number):
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
     folder_name = f"{case}_{dependency}_{k_fold_number}"
 
     train_X_filtered = np.load(os.path.join(path_to_models_and_data, folder_name, "train_X_filtered.npy"), allow_pickle=True)
@@ -408,13 +421,13 @@ def OnHW_DL_optimized_train_and_save(case, dependency, k_fold_number, model_list
         print(f"[INFO] Training: {case}_{dependency}_{k_fold_number}_{name}")
         learn = TSClassifier(
         X, y, splits=splits, bs=[64, 128], batch_tfms=batch_tfms,
-        arch=arch, arch_config=k_arch,
+        arch=arch, arch_options=k_arch,
         metrics=accuracy)
         learn.fit_one_cycle(epoch_num, lr_max=lr)
 
 
         model_name = f"model_{name}_opt"
-        path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA)
+        path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA)
         folder_name = f"{case}_{dependency}_{k_fold_number}"
         ## folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
         path_to_model = os.path.join(path_to_models_and_data, folder_name, f"{model_name}.pkl")
@@ -434,31 +447,31 @@ def OnHW_DL_train_and_save(case, dependency, k_fold_number, model_list):
         name = f"{arch.__name__}_{k}"
         print(f"[INFO] Training: {case}_{dependency}_{k_fold_number}_{name}")
         learn = Learner(dls, model,  metrics=accuracy)
-        learn.fit_one_cycle(config.TSAI_EPOCH, 1e-3)
+        learn.fit_one_cycle(options.TSAI_EPOCH, 1e-3)
 
         model_name = f"model_{name}"
-        path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA)
+        path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA)
         folder_name = f"{case}_{dependency}_{k_fold_number}"
         ## folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
         path_to_model = os.path.join(path_to_models_and_data, folder_name, f"{model_name}.pkl")
         learn.export(path_to_model)
 
 def OnHW_DL_train_all():
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 OnHW_DL_train_and_save(case, dependency, k_fold_number, DL_MODEL_LIST)
 
 def OnHW_DL_optimized_train_all():
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 OnHW_DL_optimized_train_and_save(case, dependency, k_fold_number, DL_OPT_MODEL_LIST)
 
 def OnHW_DL_load_learn_by_name(case, dependency, k_fold_number, name):
     folder_name = f"{case}_{dependency}_{k_fold_number}"
     model_name = f"model_{name}.pkl"
-    path_to_model = os.path.join(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA, folder_name, model_name)
+    path_to_model = os.path.join(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA, folder_name, model_name)
 
     learn = load_learner(path_to_model)
 
@@ -482,10 +495,10 @@ def OnHW_DL_evaluate_model(case, dependency, k_fold_number, name):
 
 
 def OnHW_DL_evaluate_all():
-    path_to_results = os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, config.DL_RESULTS_CSV)
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    path_to_results = os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, options.DL_RESULTS_CSV)
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 for i, (arch, k) in enumerate(DL_MODEL_LIST):
                     name = f"{arch.__name__}_{k}"
                     print(f"[INFO] Evaluating: {case}_{dependency}_{k_fold_number}_{name}")
@@ -497,20 +510,20 @@ def OnHW_DL_evaluate_all():
                     else:
                         df_results.to_csv(path_to_results, index = False)
 
-                    classification_report_file = os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_{name}.txt")
+                    classification_report_file = os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_{name}.txt")
                     with open(classification_report_file, 'w') as f:
                         print(report, file=f)
 
-                    conf_mat_csv_file = os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_{name}.csv")
+                    conf_mat_csv_file = os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_{name}.csv")
                     df_conf_mat = pd.DataFrame(conf_mat)
                     df_conf_mat.to_csv(conf_mat_csv_file, index=False)
 
 
 def OnHW_DL_optimized_evaluate_all():
-    path_to_results = os.path.join(config.BASE_OUTPUT, config.DL_RESULTS_OPT, config.DL_RESULTS_OPT_CSV)
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    path_to_results = os.path.join(options.BASE_OUTPUT, options.DL_RESULTS_OPT, options.DL_RESULTS_OPT_CSV)
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 for i, (arch, K) in enumerate(DL_OPT_MODEL_LIST):
 
                     k_arch = K[case]['arch_params']
@@ -527,34 +540,34 @@ def OnHW_DL_optimized_evaluate_all():
                     else:
                         df_results.to_csv(path_to_results, index = False)
 
-                    classification_report_file = os.path.join(config.BASE_OUTPUT, config.DL_RESULTS_OPT, f"classification_report_{case}_{dependency}_{k_fold_number}_{name}.txt")
+                    classification_report_file = os.path.join(options.BASE_OUTPUT, options.DL_RESULTS_OPT, f"classification_report_{case}_{dependency}_{k_fold_number}_{name}.txt")
                     with open(classification_report_file, 'w') as f:
                         print(report, file=f)
 
-                    conf_mat_csv_file = os.path.join(config.BASE_OUTPUT, config.DL_RESULTS_OPT, f"conf_mat_{case}_{dependency}_{k_fold_number}_{name}.csv")
+                    conf_mat_csv_file = os.path.join(options.BASE_OUTPUT, options.DL_RESULTS_OPT, f"conf_mat_{case}_{dependency}_{k_fold_number}_{name}.csv")
                     df_conf_mat = pd.DataFrame(conf_mat)
                     df_conf_mat.to_csv(conf_mat_csv_file, index=False)
 
 
 def make_some_folders():
-    folders_and_files.make_folder_at('.', config.BASE_OUTPUT)
+    folders_and_files.make_folder_at('.', options.BASE_OUTPUT)
 
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_RESULTS)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_RESULTS)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_RESULTS_OPT)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.OPTUNA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_RESULTS)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_RESULTS)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_RESULTS_OPT)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.OPTUNA)
 
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA)
 
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 folder_name = f"{case}_{dependency}_{k_fold_number}"
-                path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+                path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
                 folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
                 
-                path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA)                
+                path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA)                
                 folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
 
 
@@ -580,7 +593,7 @@ if __name__ == "__main__":
 
     '''No need to run 'filtering functions' as filtered data has already been generated during OnHW_ML_filter_and_extract() above
     Also assumes the 'output' folder already exists (created in the beginning of the ML train/evaluate process above). 
-    If not, either manually create it, or run folders_and_files.make_folder_at('.', config.BASE_OUTPUT)
+    If not, either manually create it, or run folders_and_files.make_folder_at('.', options.BASE_OUTPUT)
     '''
     OnHW_DL_train_all()
     OnHW_DL_evaluate_all()

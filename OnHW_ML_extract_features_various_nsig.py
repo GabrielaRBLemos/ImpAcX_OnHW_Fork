@@ -1,6 +1,6 @@
 from importlib.resources import path
 
-from utils import config
+from utils import options
 from utils import folders_and_files
 
 import os
@@ -26,14 +26,14 @@ from sklearn.svm import SVC
 
 def load_OnHW_data(case, dependency, k_fold_number):
     path_to_folder = f"onhw2_{case}_{dependency}_{k_fold_number}"
-    train_X = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "X_train.npy"), allow_pickle=True)
-    test_X = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "X_test.npy"), allow_pickle=True)
-    train_y = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "y_train.npy"), allow_pickle=True)
-    test_y = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "y_test.npy"), allow_pickle=True)
+    train_X = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "X_train.npy"), allow_pickle=True)
+    test_X = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "X_test.npy"), allow_pickle=True)
+    train_y = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "y_train.npy"), allow_pickle=True)
+    test_y = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "y_test.npy"), allow_pickle=True)
     return train_X, train_y, test_X, test_y
 
 def filter_train_test(X, y, case):
-    lower_bound, upper_bound = max(config.HARD_LOWER_BOUND, config.MEAN[case] - config.CUT_OFF_COEFF*config.STD[case]), min(config.HARD_UPPER_BOUND, config.MEAN[case] + config.CUT_OFF_COEFF*config.STD[case])
+    lower_bound, upper_bound = max(options.HARD_LOWER_BOUND, options.MEAN[case] - options.CUT_OFF_COEFF*options.STD[case]), min(options.HARD_UPPER_BOUND, options.MEAN[case] + options.CUT_OFF_COEFF*options.STD[case])
     mask = [(len(data) >= lower_bound) & (len(data) <= upper_bound) for data in X]
     return X[mask], y[mask]
 
@@ -96,12 +96,12 @@ dataset/
         └── readme.txt
 '''
 def OnHW_ML_filter_and_extract():
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:                                                                                                  
-                for nsig in config.NSIG_LIST:
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:                                                                                                  
+                for nsig in options.NSIG_LIST:
                     print(f"Processing dataset:{case}_{dependency}_{k_fold_number}_nsig{nsig}")                                                                    
                     folder_name = f"{case}_{dependency}_{k_fold_number}_nsig{nsig}"                                                                                
                     folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
@@ -113,7 +113,7 @@ def OnHW_ML_filter_and_extract():
                     extracted_features, features_filtered_train, features_filtered_test = ts_extract_feautures(
                         train_X_filtered, train_y_filtered, test_X_filtered, nsig)
 
-                    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)                                               
+                    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)                                               
                     folder_name = f"{case}_{dependency}_{k_fold_number}_nsig{nsig}"                                                                                
                     folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
 
@@ -138,5 +138,5 @@ if __name__ == "__main__":
     # os.chdir('/Volumes/T7') # For accessing feature data (Steven)
 
     '''For Figure 3 and 4, used all 5 folds of lowercase writer-independent data'''
-    # folders_and_files.make_folder_at('.', config.BASE_OUTPUT)
+    # folders_and_files.make_folder_at('.', options.BASE_OUTPUT)
     OnHW_ML_filter_and_extract()

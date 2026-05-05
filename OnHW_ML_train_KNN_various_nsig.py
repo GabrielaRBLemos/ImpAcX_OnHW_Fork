@@ -1,6 +1,6 @@
 from importlib.resources import path
 
-from utils import config
+from utils import options
 from utils import folders_and_files
 
 import os
@@ -29,7 +29,7 @@ from sklearn import metrics
 
 
 def OnHW_ML_read_filtered_data_and_extracted_features(case, dependency, k_fold_number, nsig):
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)                                                           
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)                                                           
     folder_name = f"{case}_{dependency}_{k_fold_number}_nsig{nsig}"
 
     train_X_filtered = np.load(os.path.join(path_to_models_and_data, folder_name, "train_X_filtered.npy"), allow_pickle=True)
@@ -48,9 +48,9 @@ def OnHW_ML_train_and_save(case, dependency, k_fold_number, nsig):
     for k in range(1,50):
         print(f"[INFO] Training: {case}_{dependency}_{k_fold_number}_{k}NN")
         folder_name = f"{case}_{dependency}_{k_fold_number}_nsig{nsig}"                                                                                        
-        path_to_model = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA, folder_name)                                                    
+        path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)                                                    
         model_name, scaler_name = f"model_{k}NN_nsig{nsig}", f"scaler_{k}NN_nsig{nsig}"
-        model, scaler = KNeighborsClassifier(n_neighbors=k), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)
+        model, scaler = KNeighborsClassifier(n_neighbors=k), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)
 
         train_X_features_transformed = scaler.fit_transform(train_X_features)
         folders_and_files.save_model(path_to_model, scaler_name, scaler)
@@ -63,7 +63,7 @@ def OnHW_ML_train_and_save(case, dependency, k_fold_number, nsig):
 
 def OnHW_ML_load_a_model_and_scaler_by_name(case, dependency, k_fold_number, nsig, k):
     folder_name = f"{case}_{dependency}_{k_fold_number}_nsig{nsig}"                                                                                
-    path_to_model = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA, folder_name)                                            
+    path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)                                            
     model_name, scaler_name = f"model_{k}NN_nsig{nsig}", f"scaler_{k}NN_nsig{nsig}"
     model = folders_and_files.load_model(path_to_model, model_name)
     scaler = folders_and_files.load_model(path_to_model, scaler_name)
@@ -93,20 +93,20 @@ def OnHW_ML_evaluate_model(case, dependency, k_fold_number, nsig, k):
 
 
 def OnHW_ML_train_all():
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
-                for nsig in config.NSIG_LIST:                                                                                      
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
+                for nsig in options.NSIG_LIST:                                                                                      
                     OnHW_ML_train_and_save(case, dependency, k_fold_number, nsig)                                       
 
                
 
 def OnHW_ML_evaluate_all():
-    path_to_results = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, config.ML_RESULTS_VARIOUS_NSIG_CSV)                                        
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:                                                                                      
-                for nsig in config.NSIG_LIST:
+    path_to_results = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, options.ML_RESULTS_VARIOUS_NSIG_CSV)                                        
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:                                                                                      
+                for nsig in options.NSIG_LIST:
                     # Score list holds the score for each level of nsig
                     scores_list = []
 
@@ -120,18 +120,18 @@ def OnHW_ML_evaluate_all():
                         else:
                             df_results.to_csv(path_to_results, index = False)
 
-                        classification_report_file = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_{k}NN_nsig{nsig}.txt")
+                        classification_report_file = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_{k}NN_nsig{nsig}.txt")
                         with open(classification_report_file, 'w') as f:
                             print(report, file=f)
 
-                        conf_mat_csv_file = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_{k}NN_nsig{nsig}.csv")                             
+                        conf_mat_csv_file = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_{k}NN_nsig{nsig}.csv")                             
                         df_conf_mat = pd.DataFrame(conf_mat)
                         df_conf_mat.to_csv(conf_mat_csv_file, index=False)
 
                         scores_list.append(accuracy)
 
                     # Saving accuracy for each nsig as a pickled .txt file
-                    score_list_filepath = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"kNN_fold{k_fold_number}_nsig{nsig}.txt")
+                    score_list_filepath = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"kNN_fold{k_fold_number}_nsig{nsig}.txt")
                     with open(score_list_filepath, 'wb') as fp:
                         pickle.dump(scores_list, fp)
 
@@ -141,24 +141,24 @@ def OnHW_ML_evaluate_all():
 
 
 def make_some_folders():
-    folders_and_files.make_folder_at('.', config.BASE_OUTPUT)
+    folders_and_files.make_folder_at('.', options.BASE_OUTPUT)
 
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_RESULTS)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_RESULTS)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_RESULTS_OPT)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.OPTUNA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_RESULTS)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_RESULTS)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_RESULTS_OPT)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.OPTUNA)
 
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA)
 
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 folder_name = f"{case}_{dependency}_{k_fold_number}"
-                path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+                path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
                 folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
                 
-                path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA)                
+                path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA)                
                 folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
 
 
@@ -166,7 +166,7 @@ def make_some_folders():
 if __name__ == "__main__":
     make_some_folders()
 
-    '''Run OnHW_ML_extract_features_various_nsig.py prior to extract features for all levels of n_significant, specified in config.NSIG_LIST
+    '''Run OnHW_ML_extract_features_various_nsig.py prior to extract features for all levels of n_significant, specified in options.NSIG_LIST
     CHANGE XY TO ML TO RUN ML ALGORITHMS
     CHANGE XY TO MetricLearn TO RUN ML ALGORITHMS WITH METRIC LEARNING'''
 

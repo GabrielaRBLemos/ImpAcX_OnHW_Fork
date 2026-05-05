@@ -1,6 +1,6 @@
 from pickle import TRUE
 from string import ascii_letters, ascii_lowercase, ascii_uppercase
-from utils import config
+from utils import options
 from utils import folders_and_files
 from platform import system
 
@@ -26,13 +26,13 @@ import utils.helper_files as hf
 from operator import itemgetter
 
 warnings.filterwarnings('ignore')
-ML_MODEL_AND_SCALER_DICT = {'SVM_rbf': [SVC(kernel='rbf', decision_function_shape='ovo', random_state=config.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'SVM_linear': [SVC(kernel='linear', decision_function_shape='ovo', random_state=config.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'RFC': [RandomForestClassifier(criterion='gini', n_estimators=100, random_state=config.RANDOM_STATE), None],
-                         'DT': [DecisionTreeClassifier(criterion='gini', random_state=config.RANDOM_STATE), None],
-                         'ET': [ExtraTreesClassifier(criterion='gini', n_estimators=100, random_state=config.RANDOM_STATE), None],
-                         'kNN': [KNeighborsClassifier(), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
-                         'LogReg': [LogisticRegression(random_state=config.RANDOM_STATE, max_iter=1000), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=config.RANDOM_STATE)],
+ML_MODEL_AND_SCALER_DICT = {'SVM_rbf': [SVC(kernel='rbf', decision_function_shape='ovo', random_state=options.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'SVM_linear': [SVC(kernel='linear', decision_function_shape='ovo', random_state=options.RANDOM_STATE), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'RFC': [RandomForestClassifier(criterion='gini', n_estimators=100, random_state=options.RANDOM_STATE), None],
+                         'DT': [DecisionTreeClassifier(criterion='gini', random_state=options.RANDOM_STATE), None],
+                         'ET': [ExtraTreesClassifier(criterion='gini', n_estimators=100, random_state=options.RANDOM_STATE), None],
+                         'kNN': [KNeighborsClassifier(), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
+                         'LogReg': [LogisticRegression(random_state=options.RANDOM_STATE, max_iter=1000), QuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=options.RANDOM_STATE)],
                          }
 
 # A list of DL baseline models
@@ -85,9 +85,9 @@ def create_DL_MODEL_LIST(case):
     return temp  
 
 def OnHW_explain_all(data_row = 0):
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 
                 length = len(DL_MODEL_LIST)
                 index = 0
@@ -104,7 +104,7 @@ def OnHW_explain_all(data_row = 0):
                     index = index+1
                     print(f"[INFO] Evaluating LIME: {case}_{dependency}_{k_fold_number}_{name}")
                     exp = OnHW_explain_Lime(case, dependency, k_fold_number, name,data_row=data_row)
-                    lime_html_file = hf.path_to_windows(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"lime_{case}_{dependency}_{k_fold_number}_{name}.html"))
+                    lime_html_file = hf.path_to_windows(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"lime_{case}_{dependency}_{k_fold_number}_{name}.html"))
                     if (system() == 'Windows'):
                             lime_html_file = lime_html_file.replace("{","_").replace("}","_").replace(":","_").replace("'","")
                     exp.save_to_file(lime_html_file)
@@ -136,7 +136,7 @@ def OnHW_explain_Lime(case, dependency, k_fold_number, name,scaled = True,data_r
                                  replacement_method='total_mean')
     #Plot bar
     exp.as_pyplot_figure()
-    lime_png_file = hf.path_to_windows(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"lime_bar_{case}_{dependency}_{k_fold_number}_{name}_{data_row}_{test_actual[data_row]}_{prediction}.pdf"))
+    lime_png_file = hf.path_to_windows(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"lime_bar_{case}_{dependency}_{k_fold_number}_{name}_{data_row}_{test_actual[data_row]}_{prediction}.pdf"))
     if (system() == 'Windows'): lime_png_file = lime_png_file.replace(",","_").replace(":","")
     plt.savefig(lime_png_file, format = 'pdf',bbox_inches = 'tight')
     # plt.show()
@@ -174,7 +174,7 @@ def OnHW_explain_Lime(case, dependency, k_fold_number, name,scaled = True,data_r
             if chan==channel:
                 axes[ax].axvspan(start, end, color=color, alpha=min(abs(scaled*weight),1))
         ax+=1
-    lime_ts_path_file = hf.path_to_windows(os.path.join(config.BASE_OUTPUT, config.DL_RESULTS, f"lime_ts_stacked_{case}_{dependency}_{k_fold_number}_{name}_{data_row}_{test_actual[data_row]}_{prediction}.pdf"))
+    lime_ts_path_file = hf.path_to_windows(os.path.join(options.BASE_OUTPUT, options.DL_RESULTS, f"lime_ts_stacked_{case}_{dependency}_{k_fold_number}_{name}_{data_row}_{test_actual[data_row]}_{prediction}.pdf"))
     if (system() == 'Windows'): lime_ts_path_file = lime_ts_path_file.replace(",","_").replace(":","")
     plt.savefig(lime_ts_path_file, format = 'pdf',bbox_inches = 'tight')
     plt.clf()
@@ -196,7 +196,7 @@ def tsai_ready_data(case, dependency, k_fold_number):
 
     return trainX, trainy, testX, testy
 def OnHW_ML_read_filtered_data(case, dependency, k_fold_number):
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
     folder_name = f"{case}_{dependency}_{k_fold_number}"
 
     train_X_filtered = np.load(os.path.join(path_to_models_and_data, folder_name, "train_X_filtered.npy"), allow_pickle=True)
@@ -206,7 +206,7 @@ def OnHW_ML_read_filtered_data(case, dependency, k_fold_number):
 
     return train_X_filtered, train_y_filtered, test_X_filtered, test_y_filtered
 
-def X_to_fixlength(X, maxlen=config.MAXLEN):
+def X_to_fixlength(X, maxlen=options.MAXLEN):
     return pad_sequences(X, maxlen=maxlen, truncating='post')
 
 import pathlib 

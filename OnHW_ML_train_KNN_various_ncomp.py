@@ -1,6 +1,6 @@
 from importlib.resources import path
 
-from utils import config
+from utils import options
 from utils import folders_and_files
 
 import os
@@ -28,14 +28,14 @@ from sklearn.svm import SVC
 
 def load_OnHW_data(case, dependency, k_fold_number):
     path_to_folder = f"onhw2_{case}_{dependency}_{k_fold_number}"
-    train_X = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "X_train.npy"), allow_pickle=True)
-    test_X = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "X_test.npy"), allow_pickle=True)
-    train_y = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "y_train.npy"), allow_pickle=True)
-    test_y = np.load(os.path.join(config.PATH_TO_PREPEND, path_to_folder, "y_test.npy"), allow_pickle=True)
+    train_X = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "X_train.npy"), allow_pickle=True)
+    test_X = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "X_test.npy"), allow_pickle=True)
+    train_y = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "y_train.npy"), allow_pickle=True)
+    test_y = np.load(os.path.join(options.PATH_TO_PREPEND, path_to_folder, "y_test.npy"), allow_pickle=True)
     return train_X, train_y, test_X, test_y
 
 def filter_train_test(X, y, case):
-    lower_bound, upper_bound = max(config.HARD_LOWER_BOUND, config.MEAN[case] - config.CUT_OFF_COEFF*config.STD[case]), min(config.HARD_UPPER_BOUND, config.MEAN[case] + config.CUT_OFF_COEFF*config.STD[case])
+    lower_bound, upper_bound = max(options.HARD_LOWER_BOUND, options.MEAN[case] - options.CUT_OFF_COEFF*options.STD[case]), min(options.HARD_UPPER_BOUND, options.MEAN[case] + options.CUT_OFF_COEFF*options.STD[case])
     mask = [(len(data) >= lower_bound) & (len(data) <= upper_bound) for data in X]
     return X[mask], y[mask]
 
@@ -64,7 +64,7 @@ def ts_extract_feautures(train_X, train_y, test_X):
     extracted_features = extract_features(df_train_X, column_id='id', column_sort="time")
     # remove all NaN values
     impute(extracted_features)
-    features_filtered_train = select_features(extracted_features, train_y, multiclass=True, n_significant=config.NUM_SIG)
+    features_filtered_train = select_features(extracted_features, train_y, multiclass=True, n_significant=options.NUM_SIG)
 
     features_filtered_test = extract_features(df_test_X, column_id='id', column_sort="time",
                                                kind_to_fc_parameters=settings.from_columns(features_filtered_train.columns))
@@ -99,11 +99,11 @@ dataset/
 '''
 
 def OnHW_ML_filter_and_extract():
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 print(f"Processing dataset:{case}_{dependency}_{k_fold_number}")
                 folder_name = f"{case}_{dependency}_{k_fold_number}"
                 folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
@@ -115,7 +115,7 @@ def OnHW_ML_filter_and_extract():
                 extracted_features, features_filtered_train, features_filtered_test = ts_extract_feautures(
                     train_X_filtered, train_y_filtered, test_X_filtered)
 
-                path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+                path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
                 folder_name = f"{case}_{dependency}_{k_fold_number}"
                 folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
 
@@ -131,7 +131,7 @@ def OnHW_ML_filter_and_extract():
 
 
 def OnHW_ML_read_filtered_data_and_extracted_features(case, dependency, k_fold_number):
-    path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+    path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
     folder_name = f"{case}_{dependency}_{k_fold_number}"
 
     train_X_filtered = np.load(os.path.join(path_to_models_and_data, folder_name, "train_X_filtered.npy"), allow_pickle=True)
@@ -153,19 +153,19 @@ def OnHW_MetricLearn_train_and_save(case, dependency, k_fold_number, ncomp):
     for k in range(1, 50):
         print(f"[INFO] Training: {case}_{dependency}_{k_fold_number}_NCA_{k}NN_ncomp{ncomp}")
         folder_name = f"{case}_{dependency}_{k_fold_number}_NCA_{k}NN_ncomp{ncomp}"
-        path_to_model = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA, folder_name)
+        path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)
         model_name, scaler_name, nca_name = f"nca_model_{k}NN_ncomp{ncomp}", f"nca_scaler_{k}NN_ncomp{ncomp}", f"nca_{k}NN_ncomp{ncomp}"
         model = KNeighborsClassifier(n_neighbors=k)
 
         scaler = StandardScaler() # NCA requires scaled data
-        nca = NeighborhoodComponentsAnalysis(n_components=ncomp, random_state=config.RANDOM_STATE)
+        nca = NeighborhoodComponentsAnalysis(n_components=ncomp, random_state=options.RANDOM_STATE)
 
         train_X_features_transformed = scaler.fit_transform(train_X_features)
         train_X_features_transformed = pd.DataFrame(train_X_features_transformed)
         nca.fit(train_X_features_transformed, train_y)
         train_X_features_transformed = nca.transform(train_X_features_transformed)
         
-        folders_and_files.make_folder_at(os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA), folder_name)
+        folders_and_files.make_folder_at(os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA), folder_name)
         folders_and_files.save_model(path_to_model, scaler_name, scaler)
         folders_and_files.save_model(path_to_model, nca_name, nca)
 
@@ -176,7 +176,7 @@ def OnHW_MetricLearn_train_and_save(case, dependency, k_fold_number, ncomp):
 
 def OnHW_MetricLearn_load_a_model_and_scaler_by_name(case, dependency, k_fold_number, ncomp, k):
     folder_name = f"{case}_{dependency}_{k_fold_number}_NCA_{k}NN_ncomp{ncomp}"
-    path_to_model = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA, folder_name)
+    path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)
     model_name, scaler_name, nca_name = f"nca_model_{k}NN_ncomp{ncomp}", f"nca_scaler_{k}NN_ncomp{ncomp}", f"nca_{k}NN_ncomp{ncomp}"
     model = folders_and_files.load_model(path_to_model, model_name)
     scaler = folders_and_files.load_model(path_to_model, scaler_name)
@@ -205,18 +205,18 @@ def OnHW_MetricLearn_evaluate_model(case, dependency, k_fold_number, ncomp, k):
 
 
 def OnHW_MetricLearn_train_all():
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
-                for ncomp in config.NCOMP_LIST:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
+                for ncomp in options.NCOMP_LIST:
                     OnHW_MetricLearn_train_and_save(case, dependency, k_fold_number, ncomp)
 
 def OnHW_MetricLearn_evaluate_all():
-    path_to_results = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, config.ML_RESULTS_VARIOUS_NCOMP_CSV)
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
-                for ncomp in config.NCOMP_LIST:
+    path_to_results = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, options.ML_RESULTS_VARIOUS_NCOMP_CSV)
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
+                for ncomp in options.NCOMP_LIST:
                     scores_list = []
 
                     for k in range(1, 50):
@@ -229,44 +229,44 @@ def OnHW_MetricLearn_evaluate_all():
                         else:
                             df_results.to_csv(path_to_results, index = False)
 
-                        classification_report_file = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_NCA_{k}NN_ncomp{ncomp}.txt")
+                        classification_report_file = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"classification_report_{case}_{dependency}_{k_fold_number}_NCA_{k}NN_ncomp{ncomp}.txt")
                         with open(classification_report_file, 'w') as f:
                             print(report, file=f)
 
-                        conf_mat_csv_file = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_NCA_{k}NN_ncomp{ncomp}.csv")
+                        conf_mat_csv_file = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"conf_mat_{case}_{dependency}_{k_fold_number}_NCA_{k}NN_ncomp{ncomp}.csv")
                         df_conf_mat = pd.DataFrame(conf_mat)
                         df_conf_mat.to_csv(conf_mat_csv_file, index=False)
 
                         scores_list.append(accuracy)
                     
                     # Saving accuracy for each nsig as a pickled .txt file
-                    score_list_filepath = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"NCA_kNN_fold{k_fold_number}_ncomp{ncomp}.txt")
+                    score_list_filepath = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"NCA_kNN_fold{k_fold_number}_ncomp{ncomp}.txt")
                     with open(score_list_filepath, 'wb') as fp:
                         pickle.dump(scores_list, fp)
 
 
 
 def make_some_folders():
-    folders_and_files.make_folder_at('.', config.BASE_OUTPUT)
+    folders_and_files.make_folder_at('.', options.BASE_OUTPUT)
 
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_RESULTS)
-    folders_and_files.make_folder_at(os.path.join(config.BASE_OUTPUT, config.ML_RESULTS), config.ML_RESULTS_VARIOUS_NCOMP_CSV)
-    folders_and_files.make_folder_at(os.path.join(config.BASE_OUTPUT, config.ML_RESULTS), config.ML_RESULTS_VARIOUS_NSIG_CSV)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_RESULTS)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_RESULTS_OPT)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.OPTUNA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_RESULTS)
+    folders_and_files.make_folder_at(os.path.join(options.BASE_OUTPUT, options.ML_RESULTS), options.ML_RESULTS_VARIOUS_NCOMP_CSV)
+    folders_and_files.make_folder_at(os.path.join(options.BASE_OUTPUT, options.ML_RESULTS), options.ML_RESULTS_VARIOUS_NSIG_CSV)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_RESULTS)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_RESULTS_OPT)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.OPTUNA)
 
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
-    folders_and_files.make_folder_at(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
+    folders_and_files.make_folder_at(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA)
 
-    for case in config.OnHW_CASE:
-        for dependency in config.OnHW_DEPENDENCY:
-            for k_fold_number in config.OnHW_FOLD:
+    for case in options.OnHW_CASE:
+        for dependency in options.OnHW_DEPENDENCY:
+            for k_fold_number in options.OnHW_FOLD:
                 folder_name = f"{case}_{dependency}_{k_fold_number}"
-                path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.ML_MODELS_AND_DATA)
+                path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
                 folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
                 
-                path_to_models_and_data = os.path.join(config.BASE_OUTPUT, config.DL_MODELS_AND_DATA)                
+                path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.DL_MODELS_AND_DATA)                
                 folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
 
 

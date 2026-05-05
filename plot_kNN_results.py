@@ -7,7 +7,7 @@ import seaborn as sns
 
 import pickle
 
-from utils import config
+from utils import options
 
 
 # Set size function: For making publication quality plots: from https://jwalton.info/Embed-Publication-Matplotlib-Latex/
@@ -70,8 +70,8 @@ def get_acc_scores(input_str, n_list, n_id):
     for n in n_list:
         scores_list_all = []
         
-        for k_fold_number in config.OnHW_FOLD:
-            filepath = os.path.join(config.BASE_OUTPUT, config.ML_RESULTS, f"{input_str}_fold{k_fold_number}_{n_id}{n}.txt")
+        for k_fold_number in options.OnHW_FOLD:
+            filepath = os.path.join(options.BASE_OUTPUT, options.ML_RESULTS, f"{input_str}_fold{k_fold_number}_{n_id}{n}.txt")
 
             with open(filepath, "rb") as fp:
                 scores_list_all.append(pickle.load(fp))
@@ -144,7 +144,7 @@ width = 500
 fig, ax = plt.subplots(1, 1, figsize=set_size(width, fraction=1))
 
 
-n_sig_list = config.NSIG_LIST # List of n_sig's to compute 
+n_sig_list = options.NSIG_LIST # List of n_sig's to compute 
 color = ['plum', 'gold', 'fuchsia', 'orchid', 'limegreen', 'red', 'navy','aqua', 'steelblue', 'slateblue'] # Corresponding color for each n_sig ----- Specify
 k_range = range(1,50)
 
@@ -160,7 +160,7 @@ ax.set_title('kNN Performance')
 ax.legend(loc = 'lower right')
 
 # # Saving nsig plot
-fig.savefig(os.path.join(config.BASE_OUTPUT, config.VISUALS, 'kNN_nsig_figure_colored'), format='pdf', bbox_inches='tight')
+fig.savefig(os.path.join(options.BASE_OUTPUT, options.VISUALS, 'kNN_nsig_figure_colored'), format='pdf', bbox_inches='tight')
 
 
 
@@ -173,7 +173,7 @@ fig.savefig(os.path.join(config.BASE_OUTPUT, config.VISUALS, 'kNN_nsig_figure_co
 # Creating ncomponents plot
 fig2, ax2 = plt.subplots(1, 1, figsize=set_size(width, fraction=1))
 
-n_comp_list = config.NCOMP_LIST # List of n_comp's to compute
+n_comp_list = options.NCOMP_LIST # List of n_comp's to compute
 color = ['plum', 'gold', 'fuchsia', 'red', 'orchid', 'limegreen', 'navy','aqua', 'steelblue', 'slateblue', 'purple'] # Corresponding color for each n_sig ----- Specify
 
 input_str = "NCA_kNN"
@@ -186,5 +186,5 @@ ax2.legend(loc = 'lower right')
 ax2.set_title('NCA+kNN Performance')
 
 # Saving ncomponents plot
-fig2.savefig(os.path.join(config.BASE_OUTPUT, config.VISUALS, 'kNN_ncomp_figure_colored.pdf'), format='pdf', bbox_inches='tight')
+fig2.savefig(os.path.join(options.BASE_OUTPUT, options.VISUALS, 'kNN_ncomp_figure_colored.pdf'), format='pdf', bbox_inches='tight')
 
