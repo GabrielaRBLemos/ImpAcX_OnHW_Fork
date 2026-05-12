@@ -15,7 +15,11 @@ from re import I
 from dtaidistance import dtw_ndim
 from matplotlib import pyplot as plt
 import shutil
-import pytwed
+try:
+    import pytwed
+    _PYTWED_AVAILABLE = True
+except ImportError:
+    _PYTWED_AVAILABLE = False
 from collections import Counter
 import string
 import numpy as np
@@ -225,10 +229,7 @@ def DTW(a: np.array, b: np.array):
     Returns:
         int: distance
     """
-    global i
-    i=i+1
-    x = dtw_ndim.distance_fast(a, b)
-    return x
+    return dtw_ndim.distance_fast(a, b)
 
 
 def DTW2(a: np.array, b: np.array):
@@ -241,8 +242,6 @@ def DTW2(a: np.array, b: np.array):
     Returns:
         int: distance
     """
-    global i
-    i=i+1
     x = soft_dtw(a, b, gamma=1)
     return np.exp(-x)
 
@@ -256,8 +255,6 @@ def DTW3(a: np.array, b: np.array):
     Returns:
         int: distance
     """
-    global i
-    i=i+1
     x = dtw_ndim.distance_fast(a, b)
     return np.exp(-x)
 
@@ -267,32 +264,14 @@ def DTW3(a: np.array, b: np.array):
 
 
 def TWED(a: np.array, b: np.array, a_ts: np.array, b_ts: np.array):
-    """calculates the distance between two arrays, using the TWED metric
-
-    Args:
-        a (np.array): first array
-        b (np.array): second array
-        a_ts (np.array): time series for first array
-        b_ts (np.array): time series for second array
-
-    Returns:
-        int: distance
-    """
+    if not _PYTWED_AVAILABLE:
+        raise ImportError("pytwed não está instalado. TWED não disponível (requer compilador C). Use DTW.")
     return pytwed.twed(a, b, a_ts, b_ts, nu=0.001, lmbda=1.0, p=2, fast=True)
 
 
 def TWED(a: np.array, b: np.array):
-    """calculates the distance between two arrays, using the TWED metric
-
-    Args:
-        a (np.array): first array
-        b (np.array): second array
-        a_ts (np.array): time series for first array
-        b_ts (np.array): time series for second array
-
-    Returns:
-        int: distance
-    """
+    if not _PYTWED_AVAILABLE:
+        raise ImportError("pytwed não está instalado. TWED não disponível (requer compilador C). Use DTW.")
     a_ts = np.arange(a.shape[0])
     b_ts = np.arange(b.shape[0])
     return pytwed.twed(a, b, a_ts, b_ts, nu=0.001, lmbda=1.0, p=2, fast=True)

@@ -39,22 +39,16 @@ def filter_train_test(X, y, case):
     return X[mask], y[mask]
 
 def X_npy_to_df(X):
-    df = pd.DataFrame(columns = ['id',  'time', 'f_0', 'f_1', 'f_2','f_3','f_4','f_5','f_6','f_7','f_8','f_9','f_10','f_11','f_12'])
-
-    id = 0
-    for data in X:
-        little_df = pd.DataFrame(columns = ['id',  'time', 'f_0', 'f_1', 'f_2','f_3','f_4','f_5','f_6','f_7','f_8','f_9','f_10','f_11','f_12'])
-
-        time_steps = len(data)
-        little_df['time'] = range(time_steps)
-
-        little_df.iloc[:, -13:] = pd.DataFrame(data)
-        little_df['id'] = id
-        id+=1
-
-        df = pd.concat([df, little_df])
-
-    return df.reset_index(drop=True)
+    feat_cols = [f'f_{i}' for i in range(13)]
+    chunks = []
+    for id, data in enumerate(X):
+        data = np.asarray(data, dtype=np.float64)
+        chunk = pd.DataFrame(data, columns=feat_cols)
+        chunk['id'] = id
+        chunk['time'] = np.arange(len(data))
+        chunks.append(chunk)
+    df = pd.concat(chunks, ignore_index=True)
+    return df[['id', 'time'] + feat_cols]
 
 def ts_extract_feautures(train_X, train_y, test_X, nsig, n_jobs=1):
     df_train_X = X_npy_to_df(train_X)
