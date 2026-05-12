@@ -61,6 +61,12 @@ def OnHW_ML_train_and_save(case, dependency, k_fold_number, nsig):
 def _train_one_combination(args):
     """Worker: train all k values for one (case, dependency, fold, nsig) combination."""
     case, dependency, k_fold_number, nsig = args
+    # Checkpoint: pula se o modelo k=49 já existe (indica que o treino foi completo)
+    folder_name = f"{case}_{dependency}_{k_fold_number}_nsig{nsig}"
+    path_to_model = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA, folder_name)
+    done_marker = os.path.join(path_to_model, f"model_49NN_nsig{nsig}.pkl")
+    if os.path.exists(done_marker):
+        return f"Skipped (already done): {folder_name}"
     OnHW_ML_train_and_save(case, dependency, k_fold_number, nsig)
     return f"Train done: {case}_{dependency}_{k_fold_number}_nsig{nsig}"
 

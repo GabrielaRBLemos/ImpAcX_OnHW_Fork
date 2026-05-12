@@ -73,10 +73,16 @@ def ts_extract_feautures(train_X, train_y, test_X, nsig, n_jobs=1):
 def _extract_one_combination(args):
     """Worker function: process one (case, dependency, fold, nsig) combination."""
     case, dependency, k_fold_number, nsig = args
-    print(f"Processing dataset:{case}_{dependency}_{k_fold_number}_nsig{nsig}")
-
     path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
     folder_name = f"{case}_{dependency}_{k_fold_number}_nsig{nsig}"
+    out_folder = os.path.join(path_to_models_and_data, folder_name)
+
+    # Checkpoint: pula combinações já processadas (permite retomar após desconexão)
+    if os.path.exists(os.path.join(out_folder, 'features_filtered_train.csv')):
+        print(f"Skipping (already done): {folder_name}")
+        return f"Skipped: {folder_name}"
+
+    print(f"Processing dataset:{case}_{dependency}_{k_fold_number}_nsig{nsig}")
     folders_and_files.make_folder_at(path_to_models_and_data, folder_name)
 
     train_X, train_y, test_X, test_y = load_OnHW_data(case, dependency, k_fold_number)
