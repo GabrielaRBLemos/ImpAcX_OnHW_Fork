@@ -11,6 +11,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from tsfresh import extract_features, select_features
 from tsfresh.utilities.dataframe_functions import impute
 from tsfresh.feature_extraction import settings
+from tsfresh.feature_extraction import EfficientFCParameters, ComprehensiveFCParameters
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
@@ -54,8 +55,11 @@ def _extract_and_select_for_fold(args):
     """Worker: extract features once per (case, dep, fold), then select for each nsig.
     Runs extract_features only once regardless of how many nsig values are requested,
     avoiding redundant computation and reducing peak memory usage.
+    args = (case, dependency, k_fold_number, nsig_list, fc_params_name, n_jobs)
+      fc_params_name: 'efficient' (default, ~70 features, fast) or 'comprehensive' (~750 features, slow)
     """
-    case, dependency, k_fold_number, nsig_list = args
+    case, dependency, k_fold_number, nsig_list, fc_params_name, n_jobs = args
+    fc_parameters = EfficientFCParameters() if fc_params_name == 'efficient' else ComprehensiveFCParameters()
     path_to_models_and_data = os.path.join(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
 
     # Checkpoint: skip entirely if all nsig outputs already exist
@@ -75,9 +79,9 @@ def _extract_and_select_for_fold(args):
 
     df_train_X = X_npy_to_df(train_X_filtered)
 
-    # n_jobs=1 to avoid nested multiprocessing inside worker
-    print(f"[INFO] Extracting features: {case}_{dependency}_{k_fold_number}")
-    extracted_features = extract_features(df_train_X, column_id='id', column_sort="time", n_jobs=1)
+    print(f"[INFO] Extracting features ({fc_params_name}): {case}_{dependency}_{k_fold_number}")
+    extracted_features = extract_features(df_train_X, column_id='id', column_sort="time",
+                                          default_fc_parameters=fc_parameters, n_jobs=n_jobs)
     impute(extracted_features)
 
     df_test_X = X_npy_to_df(test_X_filtered)
@@ -98,7 +102,7 @@ def _extract_and_select_for_fold(args):
         features_filtered_test = extract_features(
             df_test_X, column_id='id', column_sort="time",
             kind_to_fc_parameters=settings.from_columns(features_filtered_train.columns),
-            n_jobs=1)
+            n_jobs=n_jobs)
         features_filtered_test = features_filtered_test[features_filtered_train.columns]
         impute(features_filtered_test)
 
@@ -135,19 +139,23 @@ dataset/
         │   └── y_train.npy
         └── readme.txt
 '''
-def OnHW_ML_filter_and_extract(max_workers=1):
+def OnHW_ML_filter_and_extract(max_workers=1, fc_parameters='efficient', n_jobs=2):
     """Extract tsfresh features for all (case, dependency, fold) × nsig combinations.
 
     Groups by fold so extract_features runs once per fold (not once per nsig),
-    reducing total work by len(NSIG_LIST)×. Defaults to max_workers=1 to avoid
-    OOM on memory-constrained environments (e.g. Colab free tier).
-    Increase max_workers only if RAM allows multiple simultaneous extractions.
+    reducing total work by len(NSIG_LIST)×.
+
+    Args:
+        max_workers: parallel folds. Default 1 to avoid OOM on Colab free tier.
+        fc_parameters: 'efficient' (~70 features, ~10x faster) or 'comprehensive'
+                       (~750 features, matches original paper). Default 'efficient'.
+        n_jobs: threads used by tsfresh internally. Default 2 (safe with max_workers=1).
     """
     folders_and_files.make_folder_at(options.BASE_OUTPUT, options.ML_MODELS_AND_DATA)
 
     # One task per (case, dependency, fold) — handles all nsig values internally
     fold_combinations = [
-        (case, dependency, k_fold_number, options.NSIG_LIST)
+        (case, dependency, k_fold_number, options.NSIG_LIST, fc_parameters, n_jobs)
         for case in options.OnHW_CASE
         for dependency in options.OnHW_DEPENDENCY
         for k_fold_number in options.OnHW_FOLD
